@@ -2,8 +2,7 @@
 
 Модели в нотации BPMN 2.0 — файлы `diagrams/last-mile-as-is.bpmn` и
 `diagrams/last-mile-to-be.bpmn` (открываются в https://demo.bpmn.io или
-Camunda Modeler). Нотацию (BPMN или IDEF0) нужно подтвердить у
-руководителя; ниже тот же процесс в виде схем Mermaid для отчёта.
+Camunda Modeler); ниже тот же процесс в виде схем Mermaid для отчёта.
 
 ## Как есть — один заказ на курьера
 
