@@ -1,0 +1,2 @@
+# Правила те же, что у сервиса.
+extend = "../delivery-py/ruff.toml"

@@ -211,7 +211,12 @@ def candidates(conn, delivery_id, radius_meters, fresh_seconds, limit):
                 LIMIT %(limit)s) n ON true
             WHERE d.id = %(delivery)s AND d.status = 'PENDING'
             ORDER BY n.distance""",
-        {"delivery": delivery_id, "fresh": float(fresh_seconds), "radius": float(radius_meters), "limit": limit},
+        {
+            "delivery": delivery_id,
+            "fresh": float(fresh_seconds),
+            "radius": float(radius_meters),
+            "limit": limit,
+        },
     )
     if not rows:
         return None

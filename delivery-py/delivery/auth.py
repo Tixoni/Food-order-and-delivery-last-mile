@@ -83,7 +83,7 @@ def verify_token(token):
             # Часы сервиса и провайдера расходятся на секунды.
             leeway=5,
         )
-    except Exception as error:  # noqa: BLE001 — наружу только общая причина
+    except Exception as error:  # исключение пробрасывается дальше: наружу только общая причина
         raise errors.unauthorized("токен недействителен") from error
     return _to_user(claims)
 

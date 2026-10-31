@@ -45,7 +45,10 @@ def validate(problem):
         seen.add(courier.get("id"))
     for order in problem.get("orders", []):
         window = order.get("window") or []
-        if len(window) != 2 or window[0] > window[1]:
+        # Начало строго раньше конца — как CHECK ck_deliveries_window в базе
+        # (db/migrations/007_last_mile.sql): план не должен содержать заказ,
+        # который нельзя сохранить.
+        if len(window) != 2 or window[0] >= window[1]:
             problems.append(f"заказ {order.get('id')}: окно доставки задано неверно")
         if not isinstance(order.get("size"), (int, float)) or order["size"] <= 0:
             problems.append(f"заказ {order.get('id')}: пустой заказ (размер должен быть больше 0)")

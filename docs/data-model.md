@@ -138,3 +138,7 @@ erDiagram
 - `CHECK (window_start < window_end)`, `CHECK (size > 0)`;
 - частичный индекс активных маршрутов курьера:
   `CREATE UNIQUE INDEX … ON routes (courier_id) WHERE status = 'ACTIVE'`.
+
+Физическая модель — `db/migrations/007_last_mile.sql` (все перечисленные
+ограничения; забор раньше вручения — триггером-ограничением), проверка —
+`db/check_migration.py`, сценарии — `docs/testing.md`.

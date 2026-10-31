@@ -1,17 +1,17 @@
 """Время: текущий момент и формат дат, совместимый с JavaScript (`Date.toJSON`)."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 def utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def iso(moment):
     """2026-10-31T09:15:00.123Z — так даты отдаёт TS-версия, так их ждут шлюз и order."""
     if moment is None:
         return None
-    moment = moment.astimezone(timezone.utc)
+    moment = moment.astimezone(UTC)
     return moment.strftime("%Y-%m-%dT%H:%M:%S.") + f"{moment.microsecond // 1000:03d}Z"
 
 
@@ -23,4 +23,4 @@ def parse_iso(text):
         moment = datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
         return None
-    return moment if moment.tzinfo else moment.replace(tzinfo=timezone.utc)
+    return moment if moment.tzinfo else moment.replace(tzinfo=UTC)

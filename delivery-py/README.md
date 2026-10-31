@@ -47,6 +47,19 @@ python -m venv .venv && .venv/Scripts/pip install -r requirements-dev.txt
 .venv/Scripts/python -m delivery.lastmile ../data/moscow_sample.json [--json]
 ```
 
+## Проверки качества
+
+```bash
+.venv/Scripts/ruff check . ../db                         # правила — ruff.toml, строка до 110
+.venv/Scripts/python -X utf8 -m pytest --cov=delivery    # покрытие по модулям
+.venv/Scripts/python -X utf8 ../db/check_migration.py    # миграция 007 на базе стенда
+```
+
+`tests/test_migration.py` вызывает те же функции, что `db/check_migration.py`,
+на своей базе `delivery_lastmile_pytest_check`; если PostgreSQL стенда
+(`localhost:25432`, переменные `CHECK_POSTGRES_*`) недоступен — тесты
+пропускаются. Сценарии, покрытие и журнал ошибок — `../docs/testing.md`.
+
 Переменные окружения — те же, что у TS-версии: `DELIVERY_PORT`,
 `POSTGRES_HOST/PORT/USER/PASSWORD`, `DELIVERY_DB`, `REDIS_HOST/PORT`,
 `KAFKA_BROKERS`, `KEYCLOAK_ISSUER`, `KEYCLOAK_INTERNAL_URL`, `AUTH_AUDIENCE`,

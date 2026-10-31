@@ -161,7 +161,9 @@ def rank_candidates(delivery_id, settings):
         return None
 
     ranked = []
-    for candidate, road in zip(found["candidates"], roads):
+    # strict=False осознанно: если маршрутизатор вернёт меньше строк, лишние кандидаты
+    # не ранжируются и идут после, по прямой (REL-2), а не роняют подбор.
+    for candidate, road in zip(found["candidates"], roads, strict=False):
         # Без дороги до ресторана — в конец очереди, но не из подбора.
         seconds = math.inf if road is None else geo.travel_seconds(road, candidate["vehicle_type"])
         ranked.append((seconds, candidate["distance_meters"], candidate["courier_id"]))

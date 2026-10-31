@@ -28,6 +28,10 @@ from .routes import INF, evaluate_route, nearest_neighbor_route
 def _reason(order, couriers, ctx):
     """Почему заказ не назначен ни одному курьеру."""
     matrix = ctx["matrix"]
+    # Без этой проверки all() по пустому списку истинно, и заказ без курьеров
+    # получал причину «перегруз» — оператор искал бы не ту проблему.
+    if not couriers:
+        return "нет курьеров на смене"
     if all(order["size"] > courier["capacity"] for courier in couriers):
         return "перегруз: заказ больше вместимости любого курьера"
     if matrix[order["pickup_node"]].get(order["dropoff_node"], INF) == INF:

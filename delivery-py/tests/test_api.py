@@ -37,7 +37,8 @@ def call(method, path, body=None, headers=None):
     chunks = api.application(environ, lambda status, hdrs: response.update(status=status, headers=dict(hdrs)))
     text = b"".join(chunks).decode()
     status = int(response["status"].split()[0])
-    return status, (json.loads(text) if "json" in response["headers"]["Content-Type"] else text), response["headers"]
+    body = json.loads(text) if "json" in response["headers"]["Content-Type"] else text
+    return status, body, response["headers"]
 
 
 def test_health_is_public():

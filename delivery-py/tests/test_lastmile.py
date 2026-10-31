@@ -33,7 +33,9 @@ def task(orders, couriers=None):
         "edges": EDGES,
         "vehicles": {"bike": {"speed_kmh": 12, "capacity": 2}, "car": {"speed_kmh": 30, "capacity": 4}},
         "service": {"pickup": 0, "dropoff": 0},
-        "couriers": couriers or [{"id": "K1", "vehicle": "bike", "start": NODES["a"], "shift_minutes": 240}],
+        "couriers": couriers if couriers is not None else [
+            {"id": "K1", "vehicle": "bike", "start": NODES["a"], "shift_minutes": 240}
+        ],
         "orders": orders,
     }
 
@@ -120,16 +122,21 @@ def test_dropoff_before_pickup_is_invalid():
     assert not routes.evaluate_route(stops, ctx["couriers"][0], ctx)["valid"]
 
 
+def _stops_of(route):
+    return sorted((stop["order"], stop["kind"]) for stop in route)
+
+
 def test_two_opt_never_makes_route_worse():
     orders = [order("Z1", "e", "a"), order("Z2", "b", "d"), order("Z3", "c", "b")]
-    ctx = problem.prepare(task(orders, [{"id": "K1", "vehicle": "car", "start": NODES["c"], "shift_minutes": 240}]))
+    car = {"id": "K1", "vehicle": "car", "start": NODES["c"], "shift_minutes": 240}
+    ctx = problem.prepare(task(orders, [car]))
     courier = ctx["couriers"][0]
     greedy = routes.nearest_neighbor_route(courier, ["Z1", "Z2", "Z3"], ctx)
     before = routes.evaluate_route(greedy, courier, ctx)
     improved, after, _ = routes.two_opt(greedy, courier, ctx)
     assert after["valid"]
     assert routes.route_key(after) <= routes.route_key(before)
-    assert sorted((s["order"], s["kind"]) for s in improved) == sorted((s["order"], s["kind"]) for s in greedy)
+    assert _stops_of(improved) == _stops_of(greedy)
 
 
 def test_empty_route_is_valid():
@@ -196,3 +203,29 @@ def test_sample_plan_is_consistent():
     assert sorted(seen) == sorted(set(seen)), "каждый заказ вручается ровно один раз"
     assert set(seen) | unassigned == {f"Z{i:02d}" for i in range(1, 21)}
     assert unassigned == {"Z19", "Z20"}
+
+
+# ─────────────────────────── найденные ошибки (docs/testing.md, журнал) ───────────────────────────
+
+
+def test_no_couriers_gives_honest_reason():
+    """Ошибка №1: без курьеров причина была «перегруз»."""
+    ctx = problem.prepare(task([order("Z1", "a", "b")], couriers=[]))
+    _, _, unassigned = assign_orders(ctx)
+    assert unassigned == [{"order": "Z1", "reason": "нет курьеров на смене"}]
+
+
+def test_zero_length_window_is_rejected_like_in_database():
+    """Ошибка №3: окно [30, 30] планировщик принимал, а CHECK ck_deliveries_window — нет."""
+    with pytest.raises(ValueError, match="окно"):
+        problem.prepare(task([order("Z1", "a", "b", window=(30, 30))]))
+
+
+@pytest.mark.skipif(not SAMPLE.exists(), reason="нет data/moscow_sample.json")
+def test_cli_prints_report(capsys):
+    from delivery.lastmile.__main__ import main
+
+    assert main([str(SAMPLE)]) == 0
+    report = capsys.readouterr().out
+    assert "распределено: 18" in report and "Z20: перегруз" in report
+    assert main([]) == 2

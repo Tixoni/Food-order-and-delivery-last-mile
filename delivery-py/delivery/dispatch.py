@@ -41,11 +41,14 @@ def _cut(value, limit):
     return value[:limit] if isinstance(value, str) else None
 
 
-def request_courier(request, now=None):
+def request_courier(request, now=None, retried=False):
     """
     Запрос курьера от оркестратора. Тот же ключ — повтор вызова: прежний
     ответ, поиск не перезапускается. Новый ключ — оркестратор повторяет
     запрос после «не найден»: новый раунд поиска.
+
+    `retried` — внутренний флаг: после одновременного запроса вызов
+    повторяется один раз, а не до бесконечности.
     """
     now = now or clock.utcnow()
     request = request if isinstance(request, dict) else {}
@@ -80,9 +83,15 @@ def request_courier(request, now=None):
                 store.insert_delivery(conn, delivery)
                 search = True
     except Exception as error:
-        # Одновременный повтор успел создать доставку — отвечаем ею.
         if errors.is_duplicate_delivery(error):
-            return request_courier(request, now)
+            if retried:
+                # Индекс ux_deliveries_order_active держит и вручённую доставку,
+                # а поиск действующей её не видит: повтор не поможет, он бы зациклился.
+                raise errors.conflict(
+                    "по заказу уже есть завершённая доставка", {"orderId": request["orderId"]}
+                ) from error
+            # Одновременный повтор успел создать доставку — отвечаем ею.
+            return request_courier(request, now, retried=True)
         raise
 
     if search:

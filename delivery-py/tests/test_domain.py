@@ -1,12 +1,12 @@
 """Правила курьера, доставки и предложения — те же, что проверяет delivery.spec.ts."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
 from delivery import domain, errors
 
-NOW = datetime(2026, 11, 3, 12, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 11, 3, 12, 0, tzinfo=UTC)
 PICKUP = {"latitude": 55.75, "longitude": 37.61}
 DROPOFF = {"latitude": 55.76, "longitude": 37.62}
 
