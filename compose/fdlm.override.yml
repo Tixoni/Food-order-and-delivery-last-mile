@@ -1,0 +1,18 @@
+# Отдельный стенд практики («fdlm») поверх docker-compose исходного проекта.
+#
+# Исходный compose не меняется: этот файл только переименовывает контейнеры,
+# чтобы они не конфликтовали с окружениями проекта (fd-*, fdv-*), а порты
+# задаются переменными при запуске (25432, 26379, 29092). Тома — свои:
+# у проекта compose с именем fdlm они называются fdlm_postgres-data и т. д.
+#
+#   POSTGRES_PORT=25432 REDIS_PORT=26379 KAFKA_PORT=29092 \
+#   docker compose -p fdlm \
+#     -f ../food-delivery/infra/compose/docker-compose.yml \
+#     -f compose/fdlm.override.yml --profile core up -d
+services:
+  postgres:
+    container_name: fdlm-postgres
+  redis:
+    container_name: fdlm-redis
+  kafka:
+    container_name: fdlm-kafka

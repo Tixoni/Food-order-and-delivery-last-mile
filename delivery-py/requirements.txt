@@ -1,0 +1,6 @@
+psycopg[binary]==3.2.13
+psycopg-pool==3.2.8
+redis==5.2.1
+confluent-kafka==2.6.1
+PyJWT[crypto]==2.10.1
+waitress==3.0.2

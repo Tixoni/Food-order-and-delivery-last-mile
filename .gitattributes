@@ -1,0 +1,5 @@
+# Переводы строк — LF везде: скрипты bash и Dockerfile с CRLF не работают в Linux.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jar binary

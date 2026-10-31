@@ -1,0 +1,13 @@
+# Полная система в Docker с Python-версией сервиса доставки вместо TS.
+# Исходный compose не меняется: этот файл подменяет только образ сервиса
+# delivery; адрес, порт, переменные окружения и зависимости остаются теми же,
+# поэтому gateway и order обращаются к нему как раньше (http://delivery:3004).
+#
+#   docker build -t food-delivery/delivery-py:local delivery-py
+#   docker compose -f ../food-delivery/infra/compose/docker-compose.yml \
+#     -f compose/delivery-py.override.yml --profile apps up -d
+services:
+  delivery:
+    build: !reset null
+    image: food-delivery/delivery-py:local
+    pull_policy: never
